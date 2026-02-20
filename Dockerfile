@@ -1,12 +1,15 @@
 # ---------- build stage ----------
-FROM python:3.13-slim AS build
+FROM python:3.13-alpine AS build
 
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install \
-    tzdata \
-    autoconf automake build-essential \
-    curl git libtool pkg-config \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache \
+        build-base \
+        autoconf \
+        automake \
+        libtool \
+        pkgconfig \
+        git \
+        curl \
+        tzdata
 
 RUN git clone https://github.com/openvenues/libpostal
 WORKDIR /libpostal
@@ -19,27 +22,32 @@ RUN ./bootstrap.sh && \
     else \
         ./configure --datadir=/opt/libpostal/data; \
     fi && \
-    make && make install && ldconfig
+    make -j$(nproc) && \
+    make install
 
-RUN pip install postal==1.1.11
+RUN pip install --no-cache-dir postal==1.1.11
 
 # ---------- runtime stage ----------
-FROM python:3.13-slim
+FROM python:3.13-alpine
 
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install tzdata && \
-    rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache tzdata
+
+RUN addgroup -S appgroup && \
+    adduser -S appuser -G appgroup
 
 COPY --from=build /usr/local /usr/local
 COPY --from=build /opt/libpostal /opt/libpostal
 
-# ensure linker can find libpostal
-RUN ldconfig
-
 WORKDIR /app
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
-COPY app/ ./
 
-EXPOSE 80
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80", "--log-level", "info"]
+COPY requirements.txt ./
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY --chown=appuser:appgroup app/ ./
+
+USER appuser
+
+EXPOSE 8080
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--log-level", "info"]
