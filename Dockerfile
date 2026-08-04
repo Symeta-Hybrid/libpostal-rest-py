@@ -58,4 +58,10 @@ USER appuser
 
 EXPOSE 8080
 
+# Empty query returns 200 [] without touching libpostal, so this only proves the server is up.
+# start-period covers the data load into memory, which happens before the first request is served —
+# without it a cold start reports unhealthy. No curl in the runtime image, hence stdlib.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=180s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/parse').read()"
+
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--log-level", "info"]
