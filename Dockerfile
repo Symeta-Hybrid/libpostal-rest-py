@@ -30,7 +30,10 @@ RUN ./bootstrap.sh && \
     make -j$(nproc) && \
     make install
 
-RUN pip install --no-cache-dir postal==1.1.11
+# Version comes from requirements.txt so there is exactly one place to bump. Must be built
+# here, against the libpostal compiled above; the runtime stage has no compiler.
+COPY requirements.txt /tmp/requirements.txt
+RUN grep '^postal==' /tmp/requirements.txt | xargs pip install --no-cache-dir
 
 # ---------- runtime stage ----------
 FROM python:3.13-alpine
