@@ -5,3 +5,17 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+
+  - package-ecosystem: "github-actions"
+    target-branch: "main"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # Base image only. libpostal itself is a pinned git ref Dependabot cannot see —
+  # bump that with `make bump-libpostal`.
+  - package-ecosystem: "docker"
+    target-branch: "main"
+    directory: "/"
+    schedule:
+      interval: "weekly"
