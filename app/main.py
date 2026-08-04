@@ -1,17 +1,7 @@
-import logging
-import sys
 from fastapi import FastAPI
 from postal.expand import expand_address
 from postal.parser import parse_address
 from typing import Optional
-
-logger = logging.getLogger("libpostal-rest-py")
-logger.setLevel(logging.INFO)
-handler = logging.StreamHandler(sys.stdout)
-handler.setFormatter(
-    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-)
-logger.addHandler(handler)
 
 app = FastAPI()
 
