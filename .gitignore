@@ -201,3 +201,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Local-only agent docs (public repo — keep out of git, keep up to date on disk)
+/CLAUDE.md
+/CONTEXT.md
