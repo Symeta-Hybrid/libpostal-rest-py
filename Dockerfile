@@ -1,5 +1,5 @@
 # ---------- build stage ----------
-FROM python:3.13-alpine AS build
+FROM python:3.14-alpine AS build
 
 RUN apk add --no-cache \
         build-base \
@@ -36,7 +36,7 @@ COPY requirements.txt /tmp/requirements.txt
 RUN grep '^postal==' /tmp/requirements.txt | xargs pip install --no-cache-dir
 
 # ---------- runtime stage ----------
-FROM python:3.13-alpine
+FROM python:3.14-alpine
 
 RUN apk add --no-cache tzdata
 
