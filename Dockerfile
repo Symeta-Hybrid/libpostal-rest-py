@@ -11,7 +11,12 @@ RUN apk add --no-cache \
         curl \
         tzdata
 
-RUN git clone https://github.com/openvenues/libpostal
+# Pinned so a rebuild cannot silently change libpostal's label vocabulary — an unexpected
+# label makes consumers discard the whole parse. Bump with `make bump-libpostal`.
+ARG LIBPOSTAL_REF=25099c506612b34b23b1bfe286ca6321fcf06f35
+
+RUN git clone https://github.com/openvenues/libpostal && \
+    git -C libpostal checkout "$LIBPOSTAL_REF"
 WORKDIR /libpostal
 
 ARG TARGETARCH
